@@ -7,8 +7,6 @@ Created on Sun Mar  4 20:42:08 2018
 """
 
 # Importing the libraries
-import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
 
 # Importing the dataset
@@ -45,9 +43,9 @@ from keras.models import Sequential
 from keras.layers import Dense
 
 classifier = Sequential()
-classifier.add(Dense(units=6, kernel_initializer='uniform', activation='relu', input_dim=11))
-classifier.add(Dense(units=6, kernel_initializer='uniform', activation='relu'))
-classifier.add(Dense(units=1, kernel_initializer='uniform', activation='sigmoid'))
+classifier.add(Dense(output_dim=6, init='uniform', activation='relu', input_dim=11))
+classifier.add(Dense(output_dim=6, init='uniform', activation='relu'))
+classifier.add(Dense(output_dim=1, init='uniform', activation='sigmoid'))
 classifier.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 
 classifier.fit(X_train, y_train, batch_size=10, nb_epoch=100)
@@ -75,27 +73,19 @@ new_rec = sc.transform(new_rec)
 new_pred = classifier.predict(new_rec)
 new_pred = (new_pred > 0.5)
 
-
-# Predicting the Test set results
-y_pred = classifier.predict(X_test)
-
-# Making the Confusion Matrix
-from sklearn.metrics import confusion_matrix
-cm = confusion_matrix(y_test, y_pred)
-
 # cross val score
 from keras.wrappers.scikit_learn import KerasClassifier
 from sklearn.model_selection import cross_val_score
 
 def build_classifier():
    classifier = Sequential()
-   classifier.add(Dense(units=6, kernel_initializer='uniform', activation='relu', input_dim=11))
-   classifier.add(Dense(units=6, kernel_initializer='uniform', activation='relu'))
-   classifier.add(Dense(units=1, kernel_initializer='uniform', activation='sigmoid'))
+   classifier.add(Dense(output_dim=6, init='uniform', activation='relu', input_dim=11))
+   classifier.add(Dense(output_dim=6, init='uniform', activation='relu'))
+   classifier.add(Dense(output_dim=1, init='uniform', activation='sigmoid'))
    classifier.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
    return classifier
 
-classifier = KerasClassifier(build_fn=build_classifier, batch_size=10, epochs=100)
+classifier = KerasClassifier(build_fn=build_classifier, batch_size=10, nb_epoch=100)
 accuracies = cross_val_score(estimator=classifier, X=X_train, y=y_train, cv=10, n_jobs=1)
 mean = accuracies.mean()
 std = accuracies.std()
@@ -103,17 +93,16 @@ std = accuracies.std()
 #binary search cross validation
 def build_classifier_params(optimizer='adam', init='uniform'):
    classifier = Sequential()
-   classifier.add(Dense(units=6, kernel_initializer=init, activation='relu', input_dim=11))
-   classifier.add(Dense(units=6, kernel_initializer=init, activation='relu'))
-   classifier.add(Dense(units=1, kernel_initializer=init, activation='sigmoid'))
+   classifier.add(Dense(output_dim=6, init=init, activation='relu', input_dim=11))
+   classifier.add(Dense(output_dim=6, init=init, activation='relu'))
+   classifier.add(Dense(output_dim=1, init=init, activation='sigmoid'))
    classifier.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
    return classifier
 
 from sklearn.model_selection import GridSearchCV
 classifier = KerasClassifier(build_fn=build_classifier_params)
 
-grid_params = {'batch_size': [30, 40], 'epochs': [100, 300], 'optimizer': ['adam', 'rmsprop']}
+grid_params = {'batch_size': [30, 40], 'nb_epoch': [100, 300], 'optimizer': ['adam', 'rmsprop']}
 grid = GridSearchCV(estimator=classifier, param_grid=grid_params, scoring='accuracy', cv=10, n_jobs=1)
 grid = grid.fit(X_train, y_train)
-print(grid.best_params_)
 
