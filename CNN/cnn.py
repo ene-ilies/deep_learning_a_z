@@ -7,7 +7,7 @@ Created on Sun Mar 11 12:39:09 2018
 """
 
 # Building the CNN
-from keras import Sequential
+from keras.models import Sequential
 from keras.layers import Convolution2D
 from keras.layers import MaxPooling2D
 from keras.layers import Flatten
@@ -55,7 +55,7 @@ test_set = test_datagen.flow_from_directory(
 
 classifier.fit_generator(
         training_set,
-        steps_per_epoch=10,
-        epochs=1,
+        samples_per_epoch=8000,
+        nb_epoch=25,
         validation_data=test_set,
-        validation_steps=800, verbose=2)
+        nb_val_samples=800)
