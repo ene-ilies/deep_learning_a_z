@@ -12,6 +12,7 @@ from keras.layers import Convolution2D
 from keras.layers import MaxPooling2D
 from keras.layers import Flatten
 from keras.layers import Dense
+from keras import backend
 
 # Building the CNN
 classifier = Sequential()
@@ -63,3 +64,26 @@ classifier.fit_generator(
         nb_epoch=25,
         validation_data=test_set,
         nb_val_samples=800)
+
+real_img_gen = ImageDataGenerator(rescale=1./255)
+
+image_generator = real_img_gen.flow_from_directory(
+	'dataset/single_prediction',
+	target_size=(64,64),
+	class_mode=None,
+	shuffle=False)
+
+real_image_pred = classifier.predict_generator(image_generator,
+	val_samples=2)
+
+backend.clear_session()
+
+# flip class indices
+label_map = dict((v, k) for k,v in training_set.class_indices.items())
+
+class_idx_mapper = lambda val: (0, 1)[bool(val > 0.5)]
+category_mapper = lambda val: label_map[class_idx_mapper(val)]
+real_image_pred = [category_mapper(pred) for pred in real_image_pred]
+
+print("Predictions: ")
+print(real_image_pred)
